@@ -109,7 +109,7 @@ func (c *Client) FetchItem(id string) (*Item, error) {
 // CreateItem posts the item to the account specified
 // within the Item object.
 func (c *Client) CreateItem(item *Item) (*Item, error) {
-// required item fields:
+// fields we need to include
 // 1. Name
 // 2. IncomeAccountRef (set 'Value' and 'Name' fields using Account.ID and Account.Name, respectively)
 // 3. Type
