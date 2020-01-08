@@ -113,21 +113,18 @@ func (c *Client) CreateItem(item *Item) (*Item, error) {
 // 1. Name
 // 2. IncomeAccountRef (set 'Value' and 'Name' fields using Account.ID and Account.Name, respectively)
 // 3. Type
-	// parse url
 	u, err := url.Parse(string(c.Endpoint))
 	if err != nil {
 		return nil, err
 	}
 	u.Path = "/v3/company/" + c.RealmID + "/item"
 
-	// marshal json
 	b, err := json.Marshal(item)
 	if err != nil {
 		return nil, err
 	}
 	r := bytes.NewBuffer(b)
 
-	// create request
 	req, err := http.NewRequest("POST", u.String(), r)
 	if err != nil {
 		return nil, err
@@ -135,7 +132,6 @@ func (c *Client) CreateItem(item *Item) (*Item, error) {
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
 
-	// execute request
 	response, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
@@ -145,7 +141,6 @@ func (c *Client) CreateItem(item *Item) (*Item, error) {
 		return nil, fmt.Errorf("request failed with status: %s", response.Status)
 	}
 
-	// decode response
 	i := Item{}
 	err = json.NewDecoder(response.Body).Decode(&i)
 	return &i, err

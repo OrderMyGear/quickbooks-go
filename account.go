@@ -4,6 +4,10 @@ import (
 	"fmt"
 )
 
+type AccountQueryResponse struct {
+	Accounts []*Account `json:"Account"`
+}
+
 type Account struct {
 	ID      string `json:"Id"`
 	Name    string `json:"Name"`
@@ -11,21 +15,19 @@ type Account struct {
 	SubType string `json:"AccountSubType"`
 }
 
-func (c *Client) FetchAccounts() ([]*Account, error) {
-	var r struct {
-		QueryResponse struct {
-			Accounts []*Account
-		}
+func (c *Client) FetchChartOfAccounts() ([]*Account, error) {
+	var response struct {
+		QueryResponse AccountQueryResponse `json:"QueryResponse"`
 	}
 
-	err := c.query("SELECT * FROM Account", &r)
+	err := c.query("SELECT * FROM Account", &response)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(r.QueryResponse.Accounts) == 0 {
+	if len(response.QueryResponse.Accounts) == 0 {
 		return nil, fmt.Errorf("chart of accounts is empty")
 	}
 
-	return r.QueryResponse.Accounts, nil
+	return response.QueryResponse.Accounts, nil
 }
