@@ -113,6 +113,7 @@ func (c *Client) CreateItem(item *Item) (*Item, error) {
 // 1. Name
 // 2. IncomeAccountRef (set 'Value' and 'Name' fields using Account.ID and Account.Name, respectively)
 // 3. Type
+// 4. Description (sale code and sale name)
 	u, err := url.Parse(string(c.Endpoint))
 	if err != nil {
 		return nil, err
