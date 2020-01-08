@@ -4,6 +4,8 @@
 package quickbooks
 
 import (
+	"bytes"
+	"fmt"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -18,7 +20,7 @@ type Item struct {
 	ID        string `json:"Id,omitempty"`
 	SyncToken string `json:",omitempty"`
 	//MetaData
-	Name        string
+	Name        string `json:"Name"`
 	SKU         string `json:"Sku,omitempty"`
 	Description string `json:",omitempty"`
 	Active      bool   `json:",omitempty"`
@@ -29,7 +31,7 @@ type Item struct {
 	Taxable             bool        `json:",omitempty"`
 	SalesTaxIncluded    bool        `json:",omitempty"`
 	UnitPrice           json.Number `json:",omitempty"`
-	Type                string
+	Type                string      `json:"Type"`
 	IncomeAccountRef    ReferenceType
 	ExpenseAccountRef   ReferenceType
 	PurchaseDesc        string      `json:",omitempty"`
@@ -102,4 +104,43 @@ func (c *Client) FetchItem(id string) (*Item, error) {
 		return nil, err
 	}
 	return &r.Item, nil
+}
+
+func (c *Client) CreateItem(item *Item) (*Item, error) {
+	// parse url
+	u, err := url.Parse(string(c.Endpoint))
+	if err != nil {
+		return nil, err
+	}
+	u.Path = "/v3/company/" + c.RealmID + "/item"
+
+	// marshal json
+	b, err := json.Marshal(item)
+	if err != nil {
+		return nil, err
+	}
+	r := bytes.NewBuffer(b)
+
+	// create request
+	req, err := http.NewRequest("POST", u.String(), r)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	// execute request
+	response, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+	if response.StatusCode >= 400 {
+		return nil, fmt.Errorf("request failed with status: %s", response.Status)
+	}
+
+	// decode response
+	i := Item{}
+	err = json.NewDecoder(response.Body).Decode(&i)
+	return &i, err
 }
