@@ -106,7 +106,13 @@ func (c *Client) FetchItem(id string) (*Item, error) {
 	return &r.Item, nil
 }
 
+// CreateItem posts the item to the account specified
+// within the Item object.
 func (c *Client) CreateItem(item *Item) (*Item, error) {
+// required item fields:
+// 1. Name
+// 2. IncomeAccountRef (set 'Value' and 'Name' fields using Account.ID and Account.Name, respectively)
+// 3. Type
 	// parse url
 	u, err := url.Parse(string(c.Endpoint))
 	if err != nil {
