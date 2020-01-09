@@ -106,14 +106,7 @@ func (c *Client) FetchItem(id string) (*Item, error) {
 	return &r.Item, nil
 }
 
-// CreateItem posts the item to the account specified
-// within the Item object.
 func (c *Client) CreateItem(item *Item) (*Item, error) {
-// fields we need to include
-// 1. Name
-// 2. IncomeAccountRef (set 'Value' and 'Name' fields using Account.ID and Account.Name, respectively)
-// 3. Type
-// 4. Description (sale code and sale name)
 	u, err := url.Parse(string(c.Endpoint))
 	if err != nil {
 		return nil, err
@@ -142,7 +135,9 @@ func (c *Client) CreateItem(item *Item) (*Item, error) {
 		return nil, fmt.Errorf("request failed with status: %s", response.Status)
 	}
 
-	i := Item{}
+	var i struct {
+		Item *Item
+	}
 	err = json.NewDecoder(response.Body).Decode(&i)
-	return &i, err
+	return i.Item, err
 }
