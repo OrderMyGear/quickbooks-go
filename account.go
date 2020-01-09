@@ -12,22 +12,22 @@ type Account struct {
 	ID      string `json:"Id"`
 	Name    string `json:"Name"`
 	Active  bool   `json:"Active"`
-	SubType string `json:"AccountSubType"`
+	Type    string `json:"AccountType"`
 }
 
-func (c *Client) FetchChartOfAccounts() ([]*Account, error) {
+func (c *Client) FetchAccounts(sql string) ([]*Account, error) {
 	var response struct {
 		QueryResponse AccountQueryResponse `json:"QueryResponse"`
 	}
 
-	err := c.query("SELECT * FROM Account", &response)
+	err := c.query(sql, &response)
 	if err != nil {
 		return nil, err
 	}
 
 	if len(response.QueryResponse.Accounts) == 0 {
-		return nil, fmt.Errorf("chart of accounts is empty")
-	}
+		return nil, fmt.Errorf("no accounts returned for query: %s\n", sql)
+}
 
 	return response.QueryResponse.Accounts, nil
 }
