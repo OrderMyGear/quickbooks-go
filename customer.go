@@ -4,6 +4,7 @@
 package quickbooks
 
 import (
+	"fmt"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -82,8 +83,31 @@ func (c Customer) GetPrimaryEmail() string {
 	return ""
 }
 
+type CustomerQueryResponse struct {
+	Customers []*Customer `json:"Customer"`
+}
+
+// FetchCustomer returns the first customer found that matches the given
+// SQL criteria
+func (c *Client) FetchCustomers(sql string) ([]*Customer, error) {
+	var response struct {
+		QueryResponse CustomerQueryResponse `json:"QueryResponse"`
+	}
+
+	err := c.query(sql, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(response.QueryResponse.Customers) == 0 {
+		return nil, fmt.Errorf("no customer returned for query: %s\n", sql)
+	}
+
+	return response.QueryResponse.Customers, nil
+}
+
 // FetchCustomers gets the full list of Customers in the QuickBooks account.
-func (c *Client) FetchCustomers() ([]Customer, error) {
+func (c *Client) FetchAllCustomers() ([]Customer, error) {
 
 	// See how many customers there are.
 	var r struct {
