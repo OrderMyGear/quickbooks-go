@@ -12,7 +12,6 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 	"time"
 
 	null "gopkg.in/guregu/null.v3"
@@ -62,9 +61,11 @@ type CustomerFilter struct {
 }
 
 func (c *CustomerFilter) Eq() string {
-	sqlSelect := "SELECT * FROM Customer"
-	sqlWhere := "WHERE DisplayName = '" + c.DisplayName + "'"
-	return strings.Join([]string{sqlSelect, sqlWhere}, " ")
+	sql := "SELECT * FROM Customer"
+	if c.DisplayName != "" {
+		sql += " WHERE DisplayName = '" + c.DisplayName + "'"
+	}
+	return sql
 }
 
 // GetAddress prioritizes the ship address, but falls back on bill address
