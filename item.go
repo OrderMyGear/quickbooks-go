@@ -13,6 +13,8 @@ import (
 	"net/url"
 	"strconv"
 	"time"
+
+	"gopkg.in/validator.v2"
 )
 
 // Item represents a QuickBooks Item object (a product type).
@@ -20,9 +22,9 @@ type Item struct {
 	ID        string `json:"Id,omitempty"`
 	SyncToken string `json:",omitempty"`
 	//MetaData
-	Name        string `json:"Name"`
+	Name        string `json:"Name,omitempty" validate:"max=100"`
 	SKU         string `json:"Sku,omitempty"`
-	Description string `json:",omitempty"`
+	Description string `json:",omitempty" validate:"max=4000"`
 	Active      bool   `json:",omitempty"`
 	//SubItem
 	//ParentRef
@@ -31,7 +33,7 @@ type Item struct {
 	Taxable             bool        `json:",omitempty"`
 	SalesTaxIncluded    bool        `json:",omitempty"`
 	UnitPrice           json.Number `json:",omitempty"`
-	Type                string      `json:"Type"`
+	Type                string      `json:"Type,omitempty"`
 	IncomeAccountRef    ReferenceType
 	ExpenseAccountRef   ReferenceType
 	PurchaseDesc        string      `json:",omitempty"`
@@ -107,6 +109,10 @@ func (c *Client) FetchItem(id string) (*Item, error) {
 }
 
 func (c *Client) CreateItem(item *Item) (*Item, error) {
+	if err := validator.Validate(item); err != nil {
+		return nil, err
+	}
+
 	u, err := url.Parse(string(c.Endpoint))
 	if err != nil {
 		return nil, err
