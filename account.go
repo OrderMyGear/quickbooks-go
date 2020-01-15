@@ -2,8 +2,6 @@ package quickbooks
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 )
 
 type AccountQueryResponse struct {
@@ -18,15 +16,19 @@ type Account struct {
 }
 
 type AccountFilter struct {
-	IsActive bool
+	IsActive string // must be either "true" or "false"
 	Type     string
 }
 
 func (a *AccountFilter) Eq() string {
-	sqlSelect := "SELECT * FROM Account"
-	sqlIsActive := "WHERE Active = " + strconv.FormatBool(a.IsActive)
-	sqlType := "AND AccountType = '" + a.Type + "'"
-	return strings.Join([]string{sqlSelect, sqlIsActive, sqlType}, " ")
+	sql := "SELECT * FROM Account"
+	if a.IsActive == "true" || a.IsActive == "false" {
+		sql += " WHERE Active = " + a.IsActive
+	}
+	if a.Type != "" {
+		sql += " AND AccountType = '" + a.Type + "'"
+	}
+	return sql
 }
 
 func (c *Client) FetchAccounts(filter *AccountFilter) ([]*Account, error) {
