@@ -27,7 +27,7 @@ func (c *Client) FetchAccounts(sql string) ([]*Account, error) {
 
 	if len(response.QueryResponse.Accounts) == 0 {
 		return nil, fmt.Errorf("no accounts returned for query: %s\n", sql)
-}
+	}
 
 	return response.QueryResponse.Accounts, nil
 }
