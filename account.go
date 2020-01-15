@@ -2,6 +2,8 @@ package quickbooks
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 )
 
 type AccountQueryResponse struct {
@@ -15,13 +17,25 @@ type Account struct {
 	Type    string `json:"AccountType"`
 }
 
-func (c *Client) FetchAccounts(sql string) ([]*Account, error) {
+type AccountFilter struct {
+	IsActive bool
+	Type     string
+}
+
+func (a *AccountFilter) Eq() string {
+	sqlSelect := "SELECT * FROM Account"
+	sqlIsActive := "WHERE Active = " + strconv.FormatBool(a.IsActive)
+	sqlType := "AND AccountType = '" + a.Type + "'"
+	return strings.Join([]string{sqlSelect, sqlIsActive, sqlType}, " ")
+}
+
+func (c *Client) FetchAccounts(filter *AccountFilter) ([]*Account, error) {
 	var response struct {
 		QueryResponse AccountQueryResponse `json:"QueryResponse"`
 	}
 
-	err := c.query(sql, &response)
-	if err != nil {
+	sql := filter.Eq()
+	if err := c.query(sql, &response); err != nil {
 		return nil, err
 	}
 
