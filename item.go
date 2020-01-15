@@ -33,7 +33,7 @@ type Item struct {
 	Taxable             bool        `json:",omitempty"`
 	SalesTaxIncluded    bool        `json:",omitempty"`
 	UnitPrice           json.Number `json:",omitempty"`
-	Type                string
+	Type                string      `json:"Type,omitempty"`
 	IncomeAccountRef    ReferenceType
 	ExpenseAccountRef   ReferenceType
 	PurchaseDesc        string      `json:",omitempty"`
