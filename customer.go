@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	null "gopkg.in/guregu/null.v3"
@@ -56,6 +57,16 @@ type Customer struct {
 	//CurrencyRef
 }
 
+type CustomerFilter struct {
+	DisplayName string
+}
+
+func (c *CustomerFilter) Eq() string {
+	sqlSelect := "SELECT * FROM Customer"
+	sqlWhere := "WHERE DisplayName = '" + c.DisplayName + "'"
+	return strings.Join([]string{sqlSelect, sqlWhere}, " ")
+}
+
 // GetAddress prioritizes the ship address, but falls back on bill address
 func (c Customer) GetAddress() PhysicalAddress {
 	if c.ShipAddr != nil {
@@ -89,13 +100,14 @@ type CustomerQueryResponse struct {
 
 // FetchCustomer returns the first customer found that matches the given
 // SQL criteria
-func (c *Client) FetchCustomers(sql string) ([]*Customer, error) {
+func (c *Client) FetchCustomers(filter *CustomerFilter) ([]*Customer, error) {
 	var response struct {
 		QueryResponse CustomerQueryResponse `json:"QueryResponse"`
 	}
 
-	err := c.query(sql, &response)
-	if err != nil {
+	// SELECT * FROM Customer WHERE DisplayName = 'Cool Cars'
+	sql := filter.Eq()
+	if err := c.query(sql, &response); err != nil {
 		return nil, err
 	}
 
