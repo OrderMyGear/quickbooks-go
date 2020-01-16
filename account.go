@@ -22,9 +22,7 @@ type AccountFilter struct {
 
 func (a *AccountFilter) Eq() string {
 	sql := "SELECT * FROM Account"
-	if a.IsActive == "true" || a.IsActive == "false" {
-		sql += " WHERE Active = " + a.IsActive
-	}
+	sql += " WHERE Active = " + a.IsActive
 	if a.Type != "" {
 		sql += " AND AccountType = '" + a.Type + "'"
 	}
