@@ -99,8 +99,7 @@ type CustomerQueryResponse struct {
 	Customers []*Customer `json:"Customer"`
 }
 
-// FetchCustomer returns the first customer found that matches the given
-// SQL criteria
+// FetchCustomers returns all customers found that match the given SQL criteria
 func (c *Client) FetchCustomers(filter *CustomerFilter) ([]*Customer, error) {
 	var response struct {
 		QueryResponse CustomerQueryResponse `json:"QueryResponse"`
@@ -119,7 +118,7 @@ func (c *Client) FetchCustomers(filter *CustomerFilter) ([]*Customer, error) {
 	return response.QueryResponse.Customers, nil
 }
 
-// FetchCustomers gets the full list of Customers in the QuickBooks account.
+// FetchAllCustomers gets the full list of Customers in the QuickBooks account.
 func (c *Client) FetchAllCustomers() ([]Customer, error) {
 
 	// See how many customers there are.
