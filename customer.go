@@ -4,6 +4,7 @@
 package quickbooks
 
 import (
+	"fmt"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -55,6 +56,18 @@ type Customer struct {
 	//CurrencyRef
 }
 
+type CustomerFilter struct {
+	DisplayName string
+}
+
+func (c *CustomerFilter) Eq() string {
+	sql := "SELECT * FROM Customer"
+	if c.DisplayName != "" {
+		sql += " WHERE DisplayName = '" + c.DisplayName + "'"
+	}
+	return sql
+}
+
 // GetAddress prioritizes the ship address, but falls back on bill address
 func (c Customer) GetAddress() PhysicalAddress {
 	if c.ShipAddr != nil {
@@ -82,8 +95,31 @@ func (c Customer) GetPrimaryEmail() string {
 	return ""
 }
 
-// FetchCustomers gets the full list of Customers in the QuickBooks account.
-func (c *Client) FetchCustomers() ([]Customer, error) {
+type CustomerQueryResponse struct {
+	Customers []*Customer `json:"Customer"`
+}
+
+// FetchCustomers returns all customers found that match the given SQL criteria
+func (c *Client) FetchCustomers(filter *CustomerFilter) ([]*Customer, error) {
+	var response struct {
+		QueryResponse CustomerQueryResponse `json:"QueryResponse"`
+	}
+
+	// SELECT * FROM Customer WHERE DisplayName = 'Cool Cars'
+	sql := filter.Eq()
+	if err := c.query(sql, &response); err != nil {
+		return nil, err
+	}
+
+	if len(response.QueryResponse.Customers) == 0 {
+		return nil, fmt.Errorf("no customer returned for query: %s\n", sql)
+	}
+
+	return response.QueryResponse.Customers, nil
+}
+
+// FetchAllCustomers gets the full list of Customers in the QuickBooks account.
+func (c *Client) FetchAllCustomers() ([]Customer, error) {
 
 	// See how many customers there are.
 	var r struct {
