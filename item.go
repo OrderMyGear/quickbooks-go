@@ -4,6 +4,8 @@
 package quickbooks
 
 import (
+	"bytes"
+	"fmt"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -11,6 +13,8 @@ import (
 	"net/url"
 	"strconv"
 	"time"
+
+	"gopkg.in/validator.v2"
 )
 
 // Item represents a QuickBooks Item object (a product type).
@@ -18,9 +22,9 @@ type Item struct {
 	ID        string `json:"Id,omitempty"`
 	SyncToken string `json:",omitempty"`
 	//MetaData
-	Name        string
+	Name        string `json:"Name,omitempty" validate:"max=100"`
 	SKU         string `json:"Sku,omitempty"`
-	Description string `json:",omitempty"`
+	Description string `json:",omitempty" validate:"max=4000"`
 	Active      bool   `json:",omitempty"`
 	//SubItem
 	//ParentRef
@@ -29,7 +33,7 @@ type Item struct {
 	Taxable             bool        `json:",omitempty"`
 	SalesTaxIncluded    bool        `json:",omitempty"`
 	UnitPrice           json.Number `json:",omitempty"`
-	Type                string
+	Type                string      `json:"Type,omitempty"`
 	IncomeAccountRef    ReferenceType
 	ExpenseAccountRef   ReferenceType
 	PurchaseDesc        string      `json:",omitempty"`
@@ -102,4 +106,44 @@ func (c *Client) FetchItem(id string) (*Item, error) {
 		return nil, err
 	}
 	return &r.Item, nil
+}
+
+func (c *Client) CreateItem(item *Item) (*Item, error) {
+	if err := validator.Validate(item); err != nil {
+		return nil, err
+	}
+
+	u, err := url.Parse(string(c.Endpoint))
+	if err != nil {
+		return nil, err
+	}
+	u.Path = "/v3/company/" + c.RealmID + "/item"
+
+	b, err := json.Marshal(item)
+	if err != nil {
+		return nil, err
+	}
+	r := bytes.NewBuffer(b)
+
+	req, err := http.NewRequest("POST", u.String(), r)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	response, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+	if response.StatusCode >= 400 {
+		return nil, fmt.Errorf("request failed with status: %s", response.Status)
+	}
+
+	var i struct {
+		Item *Item
+	}
+	err = json.NewDecoder(response.Body).Decode(&i)
+	return i.Item, err
 }
