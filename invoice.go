@@ -27,9 +27,9 @@ type Invoice struct {
 	//DepartmentRef
 	PrivateNote string `json:",omitempty"`
 	//LinkedTxn
-	Line         []SalesItemLine
-	TxnTaxDetail TxnTaxDetail `json:",omitempty"`
-	CustomerRef  ReferenceType
+	Line         []SalesItemLine `json:"Line,omitempty"`
+	TxnTaxDetail TxnTaxDetail    `json:",omitempty"`
+	CustomerRef  ReferenceType   `json:"CustomerRef,omitempty"`
 	CustomerMemo MemoRef         `json:",omitempty"`
 	BillAddr     PhysicalAddress `json:",omitempty"`
 	ShipAddr     PhysicalAddress `json:",omitempty"`
@@ -85,19 +85,18 @@ type TaxLineDetail struct {
 	TaxRateRef ReferenceType
 }
 
-// SalesItemLine ...
 type SalesItemLine struct {
-	ID                  string `json:"Id,omitempty"`
-	LineNum             int    `json:",omitempty"`
-	Description         string `json:",omitempty"`
-	Amount              json.Number
-	DetailType          string
-	SalesItemLineDetail SalesItemLineDetail
+	ID                  string              `json:"Id,omitempty"`
+	LineNum             int                 `json:",omitempty"`
+	Description         string              `json:"Description,omitempty"`
+	Amount              float64             `json:"Amount,omitempty"`
+	DetailType          string              `json:"DetailType,omitempty"`
+	SalesItemLineDetail SalesItemLineDetail `json:"SalesItemLineDetail"`
 }
 
 // SalesItemLineDetail ...
 type SalesItemLineDetail struct {
-	ItemRef   ReferenceType `json:",omitempty"`
+	ItemRef   ReferenceType `json:"ItemRef,omitempty"`
 	ClassRef  ReferenceType `json:",omitempty"`
 	UnitPrice json.Number   `json:",omitempty"`
 	//MarkupInfo
