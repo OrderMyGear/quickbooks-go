@@ -91,7 +91,7 @@ type SalesItemLine struct {
 	Description         string              `json:"Description,omitempty"`
 	Amount              float64             `json:"Amount,omitempty"`
 	DetailType          string              `json:"DetailType,omitempty"`
-	SalesItemLineDetail SalesItemLineDetail `json:"SalesItemLineDetail"`
+	SalesItemLineDetail SalesItemLineDetail `json:"SalesItemLineDetail,omitmepty"`
 }
 
 // SalesItemLineDetail ...
