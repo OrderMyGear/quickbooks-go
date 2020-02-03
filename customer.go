@@ -4,7 +4,6 @@
 package quickbooks
 
 import (
-	"fmt"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -109,10 +108,6 @@ func (c *Client) FetchCustomers(filter *CustomerFilter) ([]*Customer, error) {
 	sql := filter.Eq()
 	if err := c.query(sql, &response); err != nil {
 		return nil, err
-	}
-
-	if len(response.QueryResponse.Customers) == 0 {
-		return nil, fmt.Errorf("no customer returned for query: %s\n", sql)
 	}
 
 	return response.QueryResponse.Customers, nil
