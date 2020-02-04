@@ -108,6 +108,8 @@ func (c *Client) FetchItem(id string) (*Item, error) {
 	return &r.Item, nil
 }
 
+// CreateItem creates the given Item on the QuickBooks server, returning
+// the resulting Item object.
 func (c *Client) CreateItem(item *Item) (*Item, error) {
 	if err := validator.Validate(item); err != nil {
 		return nil, err
