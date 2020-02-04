@@ -108,7 +108,11 @@ func (c *Client) FetchItem(id string) (*Item, error) {
 	return &r.Item, nil
 }
 
-func (c *Client) CreateItem(item *Item) (*Item, error) {
+// CreateItem creates the given Item on the QuickBooks server, returning
+// the resulting Item object.
+// Pass in desired request id if idempotent requests are necessary.
+// otherwise, pass in a blank string.
+func (c *Client) CreateItem(item *Item, requestID string) (*Item, error) {
 	if err := validator.Validate(item); err != nil {
 		return nil, err
 	}
@@ -118,6 +122,9 @@ func (c *Client) CreateItem(item *Item) (*Item, error) {
 		return nil, err
 	}
 	u.Path = "/v3/company/" + c.RealmID + "/item"
+	if requestID != "" {
+		u.Path += "?requestid=" + requestID
+	}
 
 	b, err := json.Marshal(item)
 	if err != nil {
