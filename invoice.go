@@ -164,12 +164,17 @@ func (c *Client) fetchInvoicePage(startpos int) ([]Invoice, error) {
 
 // CreateInvoice creates the given Invoice on the QuickBooks server, returning
 // the resulting Invoice object.
-func (c *Client) CreateInvoice(inv *Invoice) (*Invoice, error) {
+// Pass in desired request id if idempotent requests are necessary.
+// otherwise, pass in a blank string.
+func (c *Client) CreateInvoice(inv *Invoice, requestID string) (*Invoice, error) {
 	var u, err = url.Parse(string(c.Endpoint))
 	if err != nil {
 		return nil, err
 	}
 	u.Path = "/v3/company/" + c.RealmID + "/invoice"
+	if requestID != "" {
+		u.Path += "?requestid=" + requestID
+	}
 	var j []byte
 	j, err = json.Marshal(inv)
 	if err != nil {
