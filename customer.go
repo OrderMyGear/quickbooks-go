@@ -205,7 +205,12 @@ func (c *Client) CreateCustomer(customer *Customer, requestID string) (*Customer
 	}
 	u.Path = "/v3/company/" + c.RealmID + "/customer"
 	if requestID != "" {
-		u.Path += "?requestid=" + requestID
+		query, err := url.ParseQuery(u.RawQuery)
+		if err != nil {
+			return nil, err
+		}
+		query.Add("requestid", requestID)
+		u.RawQuery = query.Encode()
 	}
 	var j []byte
 	j, err = json.Marshal(customer)

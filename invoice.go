@@ -173,7 +173,12 @@ func (c *Client) CreateInvoice(inv *Invoice, requestID string) (*Invoice, error)
 	}
 	u.Path = "/v3/company/" + c.RealmID + "/invoice"
 	if requestID != "" {
-		u.Path += "?requestid=" + requestID
+		query, err := url.ParseQuery(u.RawQuery)
+		if err != nil {
+			return nil, err
+		}
+		query.Add("requestid", requestID)
+		u.RawQuery = query.Encode()
 	}
 	var j []byte
 	j, err = json.Marshal(inv)
