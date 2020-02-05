@@ -11,9 +11,6 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"time"
-
-	null "gopkg.in/guregu/null.v3"
 )
 
 // Invoice represents a QuickBooks Invoice object.
@@ -27,9 +24,9 @@ type Invoice struct {
 	//DepartmentRef
 	PrivateNote string `json:",omitempty"`
 	//LinkedTxn
-	Line         []SalesItemLine `json:"Line,omitempty"`
-	TxnTaxDetail TxnTaxDetail    `json:",omitempty"`
-	CustomerRef  ReferenceType   `json:"CustomerRef,omitempty"`
+	Line         []Line       `json:"Line,omitempty"`
+	TxnTaxDetail TxnTaxDetail `json:",omitempty"`
+	CustomerRef  ReferenceType
 	CustomerMemo MemoRef         `json:",omitempty"`
 	BillAddr     PhysicalAddress `json:",omitempty"`
 	ShipAddr     PhysicalAddress `json:",omitempty"`
@@ -69,10 +66,14 @@ type TxnTaxDetail struct {
 
 // Line ...
 type Line struct {
-	Amount json.Number `json:",omitempty"`
-	// Must be set to "TaxLineDetail".
-	DetailType    string
-	TaxLineDetail TaxLineDetail
+	ID                  string              `json:"Id,omitempty"`
+	LineNum             int                 `json:",omitempty"`
+	Description         string              `json:"Description,omitempty"`
+	Amount              float64             `json:"Amount"`
+	DetailType          string              `json:"DetailType,omitempty"`
+	SalesItemLineDetail SalesItemLineDetail `json:"SalesItemLineDetail,omitempty"`
+	DiscountLineDetail  DiscountLineDetail  `json:",omitempty"`
+	TaxLineDetail       TaxLineDetail       `json:",omitempty"`
 }
 
 // TaxLineDetail ...
@@ -81,17 +82,8 @@ type TaxLineDetail struct {
 	NetAmountTaxable json.Number `json:",omitempty"`
 	//TaxInclusiveAmount json.Number `json:",omitempty"`
 	//OverrideDeltaAmount
-	TaxPercent json.Number `json:',omitempty"`
+	TaxPercent json.Number `json:",omitempty"`
 	TaxRateRef ReferenceType
-}
-
-type SalesItemLine struct {
-	ID                  string              `json:"Id,omitempty"`
-	LineNum             int                 `json:",omitempty"`
-	Description         string              `json:"Description,omitempty"`
-	Amount              float64             `json:"Amount,omitempty"`
-	DetailType          string              `json:"DetailType,omitempty"`
-	SalesItemLineDetail SalesItemLineDetail `json:"SalesItemLineDetail,omitmepty"`
 }
 
 // SalesItemLineDetail ...
@@ -100,13 +92,19 @@ type SalesItemLineDetail struct {
 	ClassRef  ReferenceType `json:",omitempty"`
 	UnitPrice json.Number   `json:",omitempty"`
 	//MarkupInfo
-	Qty             int           `json:",omitempty"`
+	Qty             float32       `json:",omitempty"`
 	ItemAccountRef  ReferenceType `json:",omitempty"`
 	TaxCodeRef      ReferenceType `json:",omitempty"`
-	ServiceDate     null.Time     `json:",omitempty"`
+	ServiceDate     Date          `json:",omitempty"`
 	TaxInclusiveAmt json.Number   `json:",omitempty"`
 	DiscountRate    json.Number   `json:",omitempty"`
 	DiscountAmt     json.Number   `json:",omitempty"`
+}
+
+// DiscountLineDetail ...
+type DiscountLineDetail struct {
+	PercentBased    bool
+	DiscountPercent float32 `json:",omitempty"`
 }
 
 // FetchInvoices gets the full list of Invoices in the QuickBooks account.
@@ -205,7 +203,7 @@ func (c *Client) CreateInvoice(inv *Invoice, requestID string) (*Invoice, error)
 
 	var r struct {
 		Invoice Invoice
-		Time    time.Time
+		Time    Date
 	}
 	err = json.NewDecoder(res.Body).Decode(&r)
 	return &r.Invoice, err
@@ -264,7 +262,7 @@ func (c *Client) DeleteInvoice(id, syncToken string) error {
 				}
 				Type string `json:"type"`
 			}
-			Time time.Time `json:"time"`
+			Time Date `json:"time"`
 		}
 		err = json.NewDecoder(res.Body).Decode(&r)
 		if err != nil {
