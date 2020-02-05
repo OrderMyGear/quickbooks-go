@@ -104,7 +104,6 @@ func (c *Client) FetchCustomers(filter *CustomerFilter) ([]*Customer, error) {
 		QueryResponse CustomerQueryResponse `json:"QueryResponse"`
 	}
 
-	// SELECT * FROM Customer WHERE DisplayName = 'Cool Cars'
 	sql := filter.Eq()
 	if err := c.query(sql, &response); err != nil {
 		return nil, err
