@@ -198,20 +198,12 @@ func (c *Client) FetchCustomerByID(id string) (*Customer, error) {
 
 // CreateCustomer creates the given Customer on the QuickBooks server,
 // returning the resulting Customer object.
-func (c *Client) CreateCustomer(customer *Customer, requestID string) (*Customer, error) {
+func (c *Client) CreateCustomer(customer *Customer) (*Customer, error) {
 	var u, err = url.Parse(string(c.Endpoint))
 	if err != nil {
 		return nil, err
 	}
 	u.Path = "/v3/company/" + c.RealmID + "/customer"
-	if requestID != "" {
-		query, err := url.ParseQuery(u.RawQuery)
-		if err != nil {
-			return nil, err
-		}
-		query.Add("requestid", requestID)
-		u.RawQuery = query.Encode()
-	}
 	var j []byte
 	j, err = json.Marshal(customer)
 	if err != nil {
