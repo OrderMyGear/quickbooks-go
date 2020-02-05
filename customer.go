@@ -25,7 +25,7 @@ type Customer struct {
 	MiddleName         null.String     `json:",omitempty"`
 	FamilyName         null.String     `json:",omitempty"`
 	Suffix             null.String     `json:",omitempty"`
-	DisplayName        string          `json:",omitempty"`
+	DisplayName        string          `json:"DisplayName,omitempty"`
 	FullyQualifiedName null.String     `json:",omitempty"`
 	CompanyName        null.String     `json:",omitempty"`
 	PrintOnCheckName   string          `json:",omitempty"`

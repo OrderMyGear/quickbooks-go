@@ -66,12 +66,12 @@ type TxnTaxDetail struct {
 
 // Line ...
 type Line struct {
-	ID                  string `json:"Id,omitempty"`
-	LineNum             int    `json:",omitempty"`
-	Description         string `json:",omitempty"`
-	Amount              json.Number
-	DetailType          string
-	SalesItemLineDetail SalesItemLineDetail `json:",omitempty"`
+	ID                  string              `json:"Id,omitempty"`
+	LineNum             int                 `json:",omitempty"`
+	Description         string              `json:"Description,omitempty"`
+	Amount              float64             `json:"Amount"`
+	DetailType          string              `json:"DetailType,omitempty"`
+	SalesItemLineDetail SalesItemLineDetail `json:"SalesItemLineDetail,omitempty"`
 	DiscountLineDetail  DiscountLineDetail  `json:",omitempty"`
 	TaxLineDetail       TaxLineDetail       `json:",omitempty"`
 }
