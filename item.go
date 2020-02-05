@@ -12,7 +12,6 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"time"
 
 	"gopkg.in/validator.v2"
 )
@@ -41,7 +40,7 @@ type Item struct {
 	PurchaseCost        json.Number `json:",omitempty"`
 	AssetAccountRef     ReferenceType
 	TrackQtyOnHand      bool `json:",omitempty"`
-	//InvStartDate time.Time
+	//InvStartDate Date
 	QtyOnHand          json.Number   `json:",omitempty"`
 	SalesTaxCodeRef    ReferenceType `json:",omitempty"`
 	PurchaseTaxCodeRef ReferenceType `json:",omitempty"`
@@ -99,7 +98,7 @@ func (c *Client) FetchItem(id string) (*Item, error) {
 
 	var r struct {
 		Item Item
-		Time time.Time
+		Time Date
 	}
 	err = json.NewDecoder(res.Body).Decode(&r)
 	if err != nil {

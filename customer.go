@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"time"
 
 	null "gopkg.in/guregu/null.v3"
 )
@@ -50,7 +49,7 @@ type Customer struct {
 	//SalesTermRef
 	//PaymentMethodRef
 	Balance         json.Number `json:",omitempty"`
-	OpenBalanceDate time.Time   `json:",omitempty"`
+	OpenBalanceDate Date        `json:",omitempty"`
 	BalanceWithJobs json.Number `json:",omitempty"`
 	//CurrencyRef
 }
@@ -190,7 +189,7 @@ func (c *Client) FetchCustomerByID(id string) (*Customer, error) {
 	}
 	var r struct {
 		Customer Customer
-		Time     time.Time
+		Time     Date
 	}
 	err = json.NewDecoder(res.Body).Decode(&r)
 	return &r.Customer, err
@@ -235,7 +234,7 @@ func (c *Client) CreateCustomer(customer *Customer, requestID string) (*Customer
 
 	var r struct {
 		Customer Customer
-		Time     time.Time
+		Time     Date
 	}
 	err = json.NewDecoder(res.Body).Decode(&r)
 	return &r.Customer, err
@@ -285,7 +284,7 @@ func (c *Client) UpdateCustomer(customer *Customer) (*Customer, error) {
 
 	var r struct {
 		Customer Customer
-		Time     time.Time
+		Time     Date
 	}
 	err = json.NewDecoder(res.Body).Decode(&r)
 	return &r.Customer, err
