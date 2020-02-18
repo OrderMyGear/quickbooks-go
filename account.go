@@ -1,9 +1,5 @@
 package quickbooks
 
-import (
-	"fmt"
-)
-
 type AccountQueryResponse struct {
 	Accounts []*Account `json:"Account"`
 }
@@ -39,9 +35,18 @@ func (c *Client) FetchAccounts(filter *AccountFilter) ([]*Account, error) {
 		return nil, err
 	}
 
-	if len(response.QueryResponse.Accounts) == 0 {
-		return nil, fmt.Errorf("no accounts returned for query: %s\n", sql)
+	return response.QueryResponse.Accounts, nil
+}
+
+// FetchItem returns just one particular Account from QuickBooks, by ID.
+func (c *Client) FetchAccount(id string) (*Account, error) {
+	var response struct {
+		Account *Account `json:"Account"`
 	}
 
-	return response.QueryResponse.Accounts, nil
+	if err := c.getByID("account", id, &response); err != nil {
+		return nil, err
+	}
+
+	return response.Account, nil
 }

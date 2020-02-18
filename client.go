@@ -25,6 +25,7 @@ package quickbooks
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -109,4 +110,36 @@ func (c *Client) query(query string, out interface{}) error {
 	}
 
 	return json.NewDecoder(res.Body).Decode(out)
+}
+
+// getByID will build and send the request to get the given resource by the given ID
+// ex: c.getByID("account", "3", &accountResponse)
+func (c *Client) getByID(resource, id string, response interface{}) error {
+	var u, err = url.Parse(string(c.Endpoint))
+	if err != nil {
+		return err
+	}
+	u.Path = fmt.Sprintf("/v3/company/%s/%s/%s", c.RealmID, resource, id)
+
+	var req *http.Request
+	req, err = http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Add("Accept", "application/json")
+	var res *http.Response
+	res, err = c.Client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	// TODO This could be better...
+	if res.StatusCode != http.StatusOK {
+		var msg []byte
+		msg, err = ioutil.ReadAll(res.Body)
+		return errors.New(strconv.Itoa(res.StatusCode) + " " + string(msg))
+	}
+
+	return json.NewDecoder(res.Body).Decode(response)
 }
