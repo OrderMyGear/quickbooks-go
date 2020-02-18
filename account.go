@@ -1,11 +1,7 @@
 package quickbooks
 
-type AccountsQueryResponse struct {
-	Accounts []*Account `json:"Account"`
-}
-
 type AccountQueryResponse struct {
-	Account *Account `json:"Account"`
+	Accounts []*Account `json:"Account"`
 }
 
 type Account struct {
@@ -31,7 +27,7 @@ func (a *AccountFilter) Eq() string {
 
 func (c *Client) FetchAccounts(filter *AccountFilter) ([]*Account, error) {
 	var response struct {
-		QueryResponse AccountsQueryResponse `json:"QueryResponse"`
+		QueryResponse AccountQueryResponse `json:"QueryResponse"`
 	}
 
 	sql := filter.Eq()
@@ -45,12 +41,12 @@ func (c *Client) FetchAccounts(filter *AccountFilter) ([]*Account, error) {
 // FetchItem returns just one particular Account from QuickBooks, by ID.
 func (c *Client) FetchAccount(id string) (*Account, error) {
 	var response struct {
-		QueryResponse AccountQueryResponse `json:"QueryResponse"`
+		Account *Account `json:"Account"`
 	}
 
 	if err := c.getByID("account", id, &response); err != nil {
 		return nil, err
 	}
 
-	return response.QueryResponse.Account, nil
+	return response.Account, nil
 }

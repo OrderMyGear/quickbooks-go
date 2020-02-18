@@ -141,9 +141,5 @@ func (c *Client) getByID(resource, id string, response interface{}) error {
 		return errors.New(strconv.Itoa(res.StatusCode) + " " + string(msg))
 	}
 
-	err = json.NewDecoder(res.Body).Decode(response)
-	if err != nil {
-		return err
-	}
-	return nil
+	return json.NewDecoder(res.Body).Decode(response)
 }
