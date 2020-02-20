@@ -5,9 +5,9 @@ package quickbooks
 
 import (
 	"bytes"
-	"fmt"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -19,53 +19,59 @@ import (
 // Item represents a QuickBooks Item object (a product type).
 type Item struct {
 	ID        string `json:"Id,omitempty"`
-	SyncToken string `json:",omitempty"`
+	SyncToken string `json:"SyncToken,omitempty"`
 	//MetaData
 	Name        string `json:"Name,omitempty" validate:"max=100"`
 	SKU         string `json:"Sku,omitempty"`
-	Description string `json:",omitempty" validate:"max=4000"`
-	Active      bool   `json:",omitempty"`
+	Description string `json:"Description,omitempty" validate:"max=4000"`
+	Active      bool   `json:"Active,omitempty"`
 	//SubItem
 	//ParentRef
 	//Level
 	//FullyQualifiedName
-	Taxable             bool        `json:",omitempty"`
-	SalesTaxIncluded    bool        `json:",omitempty"`
-	UnitPrice           json.Number `json:",omitempty"`
-	Type                string      `json:"Type,omitempty"`
-	IncomeAccountRef    ReferenceType
-	ExpenseAccountRef   ReferenceType
-	PurchaseDesc        string      `json:",omitempty"`
-	PurchaseTaxIncluded bool        `json:",omitempty"`
-	PurchaseCost        json.Number `json:",omitempty"`
-	AssetAccountRef     ReferenceType
-	TrackQtyOnHand      bool `json:",omitempty"`
+	Taxable             bool           `json:"Taxable,omitempty"`
+	SalesTaxIncluded    bool           `json:"SalesTaxIncluded,omitempty"`
+	UnitPrice           json.Number    `json:"UnitPrice,omitempty"`
+	Type                string         `json:"Type,omitempty"`
+	IncomeAccountRef    *ReferenceType `json:"IncomeAccountRef,omitempty"`
+	ExpenseAccountRef   *ReferenceType `json:"ExpenseAccountRef,omitempty"`
+	PurchaseDesc        string         `json:"PurchaseDesc,omitempty"`
+	PurchaseTaxIncluded bool           `json:"PurchaseTaxIncluded,omitempty"`
+	PurchaseCost        json.Number    `json:"PurchaseCost,omitempty"`
+	AssetAccountRef     *ReferenceType `json:"AssetAccountRef,omitempty"`
+	TrackQtyOnHand      bool           `json:"TrackQtyOnHand,omitempty"`
 	//InvStartDate Date
-	QtyOnHand          json.Number   `json:",omitempty"`
-	SalesTaxCodeRef    ReferenceType `json:",omitempty"`
-	PurchaseTaxCodeRef ReferenceType `json:",omitempty"`
+	QtyOnHand          json.Number    `json:"QtyOnHand,omitempty"`
+	SalesTaxCodeRef    *ReferenceType `json:"SalesTaxCodeRef,omitempty"`
+	PurchaseTaxCodeRef *ReferenceType `json:"PurchaseTaxCodeRef,omitempty"`
+}
+
+type ItemFilter struct {
+	Name string
+}
+
+func (a *ItemFilter) Eq() string {
+	sql := fmt.Sprintf("SELECT * FROM Account Name = %s MAXRESULTS %s", a.Name, strconv.Itoa(queryPageSize))
+	return sql
 }
 
 // FetchItems returns the list of Items in the QuickBooks account. These are
 // basically product types, and you need them to create invoices.
-func (c *Client) FetchItems() ([]Item, error) {
-	var r struct {
+func (c *Client) FetchItems(filter *ItemFilter) ([]*Item, error) {
+	var response struct {
 		QueryResponse struct {
-			Item          []Item
+			Items         []*Item `json:"Item"`
 			StartPosition int
 			MaxResults    int
 		}
 	}
-	err := c.query("SELECT * FROM Item MAXRESULTS "+strconv.Itoa(queryPageSize), &r)
-	if err != nil {
+
+	sql := filter.Eq()
+	if err := c.query(sql, &response); err != nil {
 		return nil, err
 	}
 
-	// Make sure we don't return nil if there are no items.
-	if r.QueryResponse.Item == nil {
-		r.QueryResponse.Item = make([]Item, 0)
-	}
-	return r.QueryResponse.Item, nil
+	return response.QueryResponse.Items, nil
 }
 
 // FetchItem returns just one particular Item from QuickBooks, by ID.
