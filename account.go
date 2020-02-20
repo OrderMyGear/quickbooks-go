@@ -1,14 +1,10 @@
 package quickbooks
 
-type AccountQueryResponse struct {
-	Accounts []*Account `json:"Account"`
-}
-
 type Account struct {
-	ID      string `json:"Id"`
-	Name    string `json:"Name"`
-	Active  bool   `json:"Active"`
-	Type    string `json:"AccountType"`
+	ID     string `json:"Id"`
+	Name   string `json:"Name"`
+	Active bool   `json:"Active"`
+	Type   string `json:"AccountType"`
 }
 
 type AccountFilter struct {
@@ -27,7 +23,11 @@ func (a *AccountFilter) Eq() string {
 
 func (c *Client) FetchAccounts(filter *AccountFilter) ([]*Account, error) {
 	var response struct {
-		QueryResponse AccountQueryResponse `json:"QueryResponse"`
+		QueryResponse struct {
+			Accounts      []*Account `json:"Account"`
+			StartPosition int
+			MaxResults    int
+		}
 	}
 
 	sql := filter.Eq()
