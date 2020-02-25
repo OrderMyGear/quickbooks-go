@@ -51,7 +51,7 @@ type ItemFilter struct {
 }
 
 func (a *ItemFilter) Eq() string {
-	sql := fmt.Sprintf("SELECT * FROM Account Name = %s MAXRESULTS %s", a.Name, strconv.Itoa(queryPageSize))
+	sql := fmt.Sprintf("SELECT * FROM Item WHERE Name = '%s' MAXRESULTS %s", a.Name, strconv.Itoa(queryPageSize))
 	return sql
 }
 
