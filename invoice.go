@@ -37,7 +37,7 @@ type Invoice struct {
 	ShipMethodRef ReferenceType `json:",omitempty"`
 	ShipDate      Date          `json:",omitempty"`
 	TrackingNum   string        `json:",omitempty"`
-	TotalAmt      float64       `json:",omitempty"`
+	TotalAmt      json.Number   `json:",omitempty"`
 	//CurrencyRef
 	ExchangeRate          json.Number  `json:",omitempty"`
 	HomeAmtTotal          json.Number  `json:",omitempty"`
