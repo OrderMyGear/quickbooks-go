@@ -164,7 +164,7 @@ func (c *Client) fetchInvoicePage(startpos int) ([]Invoice, error) {
 // the resulting Invoice object.
 // Pass in desired request id if idempotent requests are necessary.
 // otherwise, pass in a blank string.
-func (c *Client) CreateInvoice(inv *Invoice, requestID string) (*Invoice, error) {
+func (c *Client) CreateInvoice(invoice interface{}, requestID string) (*Invoice, error) {
 	var u, err = url.Parse(string(c.Endpoint))
 	if err != nil {
 		return nil, err
@@ -176,7 +176,7 @@ func (c *Client) CreateInvoice(inv *Invoice, requestID string) (*Invoice, error)
 		u.RawQuery = query.Encode()
 	}
 	var j []byte
-	j, err = json.Marshal(inv)
+	j, err = json.Marshal(invoice)
 	if err != nil {
 		return nil, err
 	}
